@@ -6,55 +6,32 @@ Topics: IBM API Connect, Kong Gateway, Middleware & Integration, POS Modernizati
 
 ## Live Site
 
-After setup, your site will be at:
+Live site:
 
 ```
-https://YOUR_GITHUB_USERNAME.github.io/ayush-integration-lab/
+https://ayusshsharma.github.io/Integration-and-beyond/
 ```
 
-Or, if you use a `YOUR_GITHUB_USERNAME.github.io` repo:
-
-```
-https://YOUR_GITHUB_USERNAME.github.io/
-```
+Repository: [github.com/ayusshsharma/Integration-and-beyond](https://github.com/ayusshsharma/Integration-and-beyond)
 
 ## Quick Start — Publish to GitHub Pages
 
-### Step 1: Update your GitHub username
-
-Edit `_config.yml` and replace `YOUR_GITHUB_USERNAME` in three places:
-
-```yaml
-url: "https://YOUR_GITHUB_USERNAME.github.io"
-github_username: YOUR_GITHUB_USERNAME
-```
-
-Also update `linkedin_username` and `email`.
-
-**Important:** If your repo is named `YOUR_GITHUB_USERNAME.github.io`, set `baseurl: ""`.  
-If your repo is named `ayush-integration-lab`, keep `baseurl: "/ayush-integration-lab"`.
-
-### Step 2: Create the GitHub repository
-
-1. Go to [github.com/new](https://github.com/new)
-2. Repository name: `ayush-integration-lab` (or `YOUR_GITHUB_USERNAME.github.io` for a user site)
-3. Set to **Public**
-4. Do **not** initialize with README (we already have one)
-5. Click **Create repository**
-
-### Step 3: Push this project
+### Step 1: Push this project
 
 ```powershell
 cd C:\Users\Admin\Projects\ayush-integration-lab
-git init
-git add .
-git commit -m "Initial commit: Ayush Integration Lab blog"
-git branch -M main
-git remote add origin https://github.com/YOUR_GITHUB_USERNAME/ayush-integration-lab.git
+git remote add origin https://github.com/ayusshsharma/Integration-and-beyond.git
 git push -u origin main
 ```
 
-### Step 4: Enable GitHub Pages
+If the remote already exists, use:
+
+```powershell
+git remote set-url origin https://github.com/ayusshsharma/Integration-and-beyond.git
+git push -u origin main
+```
+
+### Step 2: Enable GitHub Pages
 
 1. Open your repo on GitHub → **Settings** → **Pages**
 2. Under **Build and deployment**:
@@ -73,7 +50,7 @@ bundle install
 bundle exec jekyll serve
 ```
 
-Open [http://localhost:4000/ayush-integration-lab/](http://localhost:4000/ayush-integration-lab/) (adjust if `baseurl` is empty).
+Open [http://localhost:4000/Integration-and-beyond/](http://localhost:4000/Integration-and-beyond/)
 
 ## Adding New Posts
 

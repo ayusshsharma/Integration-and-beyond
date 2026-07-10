@@ -3,14 +3,12 @@ description: Real-world notes on API Connect, Kong Gateway, middleware, and inte
 author: Ayush
 email: hello@example.com
 
-# Update these after creating your GitHub repo:
-# - If repo is YOUR_USERNAME.github.io → baseurl: ""
-# - If repo is ayush-integration-lab → baseurl: "/ayush-integration-lab"
-url: "https://YOUR_GITHUB_USERNAME.github.io"
-baseurl: "/ayush-integration-lab"
+url: "https://ayusshsharma.github.io"
+baseurl: "/Integration-and-beyond"
 
-github_username: YOUR_GITHUB_USERNAME
-linkedin_username: yourprofile
+github_username: ayusshsharma
+repository: Integration-and-beyond
+linkedin_username: ayusshsharma
 
 markdown: kramdown
 highlighter: rouge
