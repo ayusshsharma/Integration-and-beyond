@@ -1,0 +1,51 @@
+title: Ayush Integration Lab
+description: Real-world notes on API Connect, Kong Gateway, middleware, and integration experiments.
+author: Ayush
+email: hello@example.com
+
+# Update these after creating your GitHub repo:
+# - If repo is YOUR_USERNAME.github.io → baseurl: ""
+# - If repo is ayush-integration-lab → baseurl: "/ayush-integration-lab"
+url: "https://YOUR_GITHUB_USERNAME.github.io"
+baseurl: "/ayush-integration-lab"
+
+github_username: YOUR_GITHUB_USERNAME
+linkedin_username: yourprofile
+
+markdown: kramdown
+highlighter: rouge
+permalink: /:categories/:year/:month/:day/:title/
+excerpt_separator: "<!--more-->"
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: page
+
+category_names:
+  - IBM API Connect
+  - Kong Gateway
+  - Middleware & Integration
+  - POS Modernization
+  - n8n Automation
+  - Tech Experiments / POCs
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - wordpress-theme
+  - .git
+  - .gitignore

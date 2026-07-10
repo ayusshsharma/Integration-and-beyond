@@ -1,0 +1,39 @@
+---
+layout: default
+---
+<section class="hero-section">
+  <div class="hero-section__inner">
+    <h1>{{ site.title }}</h1>
+    <p>{{ site.description }}</p>
+    <a class="btn" href="#latest-posts">Browse Latest Posts</a>
+  </div>
+</section>
+
+<main class="site-main" id="latest-posts" role="main">
+  <div class="content-wrapper">
+    <div class="content-area">
+      <div class="posts-grid">
+        {% for post in site.posts %}
+          <article class="post-card">
+            <div class="post-card__meta">
+              {% if post.categories.first %}
+                <a class="post-card__category" href="{{ post.categories.first | slugify | prepend: '/category/' | append: '/' | relative_url }}">
+                  {{ post.categories.first }}
+                </a>
+              {% endif %}
+              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %d, %Y" }}</time>
+            </div>
+            <h2 class="post-card__title">
+              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+            </h2>
+            <div class="post-card__excerpt">
+              {{ post.excerpt }}
+            </div>
+            <a class="read-more" href="{{ post.url | relative_url }}">Read more</a>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+    {% include sidebar.html %}
+  </div>
+</main>

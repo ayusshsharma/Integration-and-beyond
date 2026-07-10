@@ -1,0 +1,40 @@
+---
+layout: default
+---
+<main class="site-main" role="main">
+  <div class="content-wrapper">
+    <div class="content-area">
+      <article class="single-post">
+        <header class="single-post__header">
+          <h1 class="single-post__title">{{ page.title }}</h1>
+          <div class="single-post__meta">
+            {% if page.categories.first %}
+              <span class="single-post__category">
+                <a href="{{ page.categories.first | slugify | prepend: '/category/' | append: '/' | relative_url }}">
+                  {{ page.categories.first }}
+                </a>
+              </span>
+            {% endif %}
+            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>
+            <span class="single-post__author">By {{ site.author }}</span>
+          </div>
+          {% if page.tags.size > 0 %}
+            <div class="single-post__tags">
+              {% for tag in page.tags %}
+                <a class="tag-link" href="{{ tag | slugify | prepend: '/tag/' | append: '/' | relative_url }}">#{{ tag }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </header>
+        <nav class="table-of-contents" id="toc" aria-label="Table of Contents" style="display:none;">
+          <h2 class="table-of-contents__title">Table of Contents</h2>
+          <ol id="toc-list"></ol>
+        </nav>
+        <div class="single-post__content">
+          {{ content }}
+        </div>
+      </article>
+    </div>
+    {% include sidebar.html %}
+  </div>
+</main>

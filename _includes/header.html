@@ -1,0 +1,22 @@
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+
+    <div class="site-branding">
+      <h1 class="site-title">
+        <a href="{{ '/' | relative_url }}" rel="home">{{ site.title }}</a>
+      </h1>
+      <p class="site-description">{{ site.description }}</p>
+    </div>
+
+    <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">Menu</button>
+
+    <nav class="main-navigation" id="primary-menu" role="navigation" aria-label="Primary Navigation">
+      <ul>
+        <li><a href="{{ '/' | relative_url }}">Home</a></li>
+        <li><a href="{{ '/about/' | relative_url }}">About</a></li>
+        <li><a href="{{ '/blog/' | relative_url }}">Blog</a></li>
+      </ul>
+    </nav>
+
+  </div>
+</header>
