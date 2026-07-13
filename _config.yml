@@ -33,11 +33,6 @@ defaults:
 
 category_names:
   - IBM API Connect
-  - Kong Gateway
-  - Middleware & Integration
-  - POS Modernization
-  - n8n Automation
-  - Tech Experiments / POCs
 
 exclude:
   - Gemfile
@@ -47,3 +42,8 @@ exclude:
   - wordpress-theme
   - .git
   - .gitignore
+  - category/kong-gateway
+  - category/middleware-integration
+  - category/pos-modernization
+  - category/n8n-automation
+  - category/tech-experiments
