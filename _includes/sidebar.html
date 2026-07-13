@@ -11,22 +11,7 @@
           {% endif %}
         {% endfor %}
         <li class="cat-item">
-          {% case cat %}
-            {% when "IBM API Connect" %}
-              {% assign cat_url = "/category/ibm-api-connect/" %}
-            {% when "Kong Gateway" %}
-              {% assign cat_url = "/category/kong-gateway/" %}
-            {% when "Middleware & Integration" %}
-              {% assign cat_url = "/category/middleware-integration/" %}
-            {% when "POS Modernization" %}
-              {% assign cat_url = "/category/pos-modernization/" %}
-            {% when "n8n Automation" %}
-              {% assign cat_url = "/category/n8n-automation/" %}
-            {% when "Tech Experiments / POCs" %}
-              {% assign cat_url = "/category/tech-experiments/" %}
-            {% else %}
-              {% assign cat_url = cat | slugify | prepend: "/category/" | append: "/" %}
-          {% endcase %}
+          {% assign cat_url = cat | slugify | prepend: "/category/" | append: "/" %}
           <a href="{{ cat_url | relative_url }}">{{ cat }}</a>
           <span class="category-count">({{ count }})</span>
         </li>
