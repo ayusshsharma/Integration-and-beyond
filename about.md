@@ -10,6 +10,5 @@ With experience across retail, banking, and logistics, I share practical notes, 
 
 ## Connect
 
-- GitHub: [{{ site.github_username }}](https://github.com/{{ site.github_username }})
 - LinkedIn: [{{ site.linkedin_username }}](https://linkedin.com/in/{{ site.linkedin_username }})
 - Email: [{{ site.email }}](mailto:{{ site.email }})
