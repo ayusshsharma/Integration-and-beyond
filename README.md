@@ -1,39 +1,34 @@
 # Ayush Integration Lab
 
-A technical blog built with [Jekyll](https://jekyllrb.com/) and hosted on **GitHub Pages**.
+A technical blog built with [Jekyll](https://jekyllrb.com/).
 
 Topics: IBM API Connect, Kong Gateway, Middleware & Integration, POS Modernization, n8n Automation, and Tech Experiments.
 
 ## Live Site
 
-Live site:
+After Pages is enabled, the site is available at the URL shown in your hosting settings (project site path matches this repository’s name).
 
-```
-https://ayusshsharma.github.io/Integration-and-beyond/
-```
-
-Repository: [github.com/ayusshsharma/Integration-and-beyond](https://github.com/ayusshsharma/Integration-and-beyond)
-
-## Quick Start — Publish to GitHub Pages
+## Quick Start — Publish
 
 ### Step 1: Push this project
 
+From the project directory:
+
 ```powershell
-cd C:\Users\Admin\Projects\ayush-integration-lab
-git remote add origin https://github.com/ayusshsharma/Integration-and-beyond.git
+git remote add origin <your-remote-url>
 git push -u origin main
 ```
 
-If the remote already exists, use:
+If the remote already exists:
 
 ```powershell
-git remote set-url origin https://github.com/ayusshsharma/Integration-and-beyond.git
+git remote set-url origin <your-remote-url>
 git push -u origin main
 ```
 
-### Step 2: Enable GitHub Pages
+### Step 2: Enable Pages hosting
 
-1. Open your repo on GitHub → **Settings** → **Pages**
+1. Open the repository **Settings** → **Pages**
 2. Under **Build and deployment**:
    - Source: **Deploy from a branch**
    - Branch: **main** / **/ (root)**
@@ -50,7 +45,7 @@ bundle install
 bundle exec jekyll serve
 ```
 
-Open [http://localhost:4000/Integration-and-beyond/](http://localhost:4000/Integration-and-beyond/)
+Open the local URL printed by Jekyll (includes this site’s `baseurl` path).
 
 ## Adding New Posts
 
@@ -72,7 +67,7 @@ key: value
 ​```
 ```
 
-Commit and push — GitHub Pages rebuilds automatically.
+Commit and push — the host rebuilds automatically.
 
 ## Customizing Colors & Typography
 

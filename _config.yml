@@ -6,8 +6,6 @@ email: ayusshsharma@outlook.com
 url: "https://ayusshsharma.github.io"
 baseurl: "/Integration-and-beyond"
 
-github_username: ayusshsharma
-repository: Integration-and-beyond
 linkedin_username: ayusshsharma
 
 markdown: kramdown
@@ -40,6 +38,7 @@ exclude:
   - node_modules
   - vendor
   - wordpress-theme
+  - README.md
   - .git
   - .gitignore
   - category/kong-gateway
