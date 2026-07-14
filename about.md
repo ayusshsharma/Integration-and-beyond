@@ -4,7 +4,7 @@ title: About Me
 permalink: /about/
 ---
 
-Welcome to **Ayush Integration Lab**. I write about IBM API Connect, Openshift, Kong Gateway, enterprise middleware, and automation experiments from the field.
+Welcome to my ** Integration Lab**. I write about IBM API Connect, Openshift, enterprise middleware, and automation experiments from the field.
 
 With experience across retail, banking, and logistics, I share practical notes, POCs, and lessons learned — not marketing fluff.
 
