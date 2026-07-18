@@ -402,7 +402,7 @@ hr {
 }
 
 .read-more::after {
-  content: "â†’";
+  content: "→";
   transition: transform var(--transition);
 }
 
