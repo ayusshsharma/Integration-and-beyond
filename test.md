@@ -2,10 +2,13 @@
 layout: post
 title: "API Designer is gone. Assembly isn’t."
 date: 2026-07-18 10:30:00 +0400
+permalink: /test/
 description: "IBM API Connect v12 replaces API Designer with API Studio — but assembly is not gone. It becomes a named, versioned, reusable policy sequence. A practical Designer-to-Studio map for v10 veterans."
 categories: [IBM API Connect]
 tags: [api-connect, ibm, api-studio, api-designer, api-management, integration, assembly, policy-sequence]
 ---
+
+> **Preview draft** — hosted at `/test/` for review. Not listed on Home or Blog yet.
 
 If you lived in API Connect v10, the first look at v12 can feel like someone stole your Assembly canvas. Relax. **API Designer is deprecated and replaced by IBM API Studio** — but the assembly model did not disappear. Studio turns that flow into a named, versioned, reusable **policy sequence** so API Connect can scale like modern software delivery: Git, reuse, multi-gateway, and AI tooling.
 
