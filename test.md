@@ -32,6 +32,104 @@ What used to be “the assembly on this API” is now something you attach:
 
 Same Orders flow (invoke backend → map response) still exists. In Designer it sat under **assembly.execute**. In Studio it lives in a **policy-sequence** file and the API just references it. Reuse without copy-paste.
 
+### Old: one API YAML (Designer)
+
+```yaml
+# orders-1.0.0.yaml — contract + assembly together
+openapi: 3.0.3
+info:
+  title: Orders API
+  version: 1.0.0
+paths:
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      # ... parameters & responses ...
+
+x-ibm-configuration:
+  assembly:
+    execute:
+      - invoke:
+          title: invoke-orders-backend
+          target-url: $(orders-backend-url)/orders/$(request.parameters.orderId)
+      - map:
+          title: map-order-response
+          inputs:
+            backend:
+              variable: message.body
+          outputs:
+            response:
+              variable: message.body
+          actions:
+            - set: response.orderId
+              from: backend.id
+            - set: response.status
+              from: backend.orderStatus
+```
+
+### New: api-spec + policy sequence (Studio)
+
+**1. Clean OpenAPI (api-spec)**
+
+```yaml
+# orders-api-spec.yaml
+openapi: 3.0.3
+info:
+  title: Orders API
+  version: 1.0.0
+paths:
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      # ... parameters & responses ...
+```
+
+**2. Policy sequence (the old assembly)**
+
+```yaml
+# orders-backend-flow.yaml
+kind: PolicySequence
+metadata:
+  name: orders-backend-flow
+  namespace: orders
+  version: 1.0.0
+spec:
+  execute:
+    - invoke:
+        title: invoke-orders-backend
+        target-url: $(orders-backend-url)/orders/$(request.parameters.orderId)
+    - map:
+        title: map-order-response
+        inputs:
+          backend:
+            variable: message.body
+        outputs:
+          response:
+            variable: message.body
+        actions:
+          - set: response.orderId
+            from: backend.id
+          - set: response.status
+            from: backend.orderStatus
+```
+
+**3. API metadata attaches it**
+
+```yaml
+# orders-api.yaml
+kind: api
+metadata:
+  name: orders
+  namespace: orders
+  version: 1.0.0
+spec:
+  api-spec: orders-api-spec.yaml
+  policy-seq:
+    $ref: orders:orders-backend-flow:1.0.0
+```
+
+Same **invoke** → **map**. Different packaging — and that sequence can be reused on other APIs or scopes.
+
 ## Why IBM moved this way
 
 Studio is built for **API-as-code**, shared governance, multi-gateway authoring (DataPower API Gateway, Nano, webMethods), DevOps ownership, and AI/agent tooling. Structured assets beat one opaque mega-YAML.
