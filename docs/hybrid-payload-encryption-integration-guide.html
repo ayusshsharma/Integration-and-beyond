@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hybrid Payload Encryption Integration Guide (AES-256-CBC + RSA)</title>
+  <meta name="description" content="Enterprise architecture documentation for hybrid payload encryption using AES-256-CBC session keys and RSA public-key wrapping for frontend, API, and security teams." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --az-blue: #0078D4;
+      --az-blue-dark: #005A9E;
+      --az-blue-soft: #E6F2FB;
+      --az-purple: #5C2D91;
+      --az-purple-soft: #F3EAFB;
+      --az-green: #107C10;
+      --az-green-soft: #EAF6EA;
+      --az-gold: #C19C00;
+      --az-gold-soft: #FFF8DB;
+      --az-teal: #008272;
+      --ink: #1B1A19;
+      --muted: #605E5C;
+      --line: #E1DFDD;
+      --panel: #FFFFFF;
+      --page: #F3F2F1;
+      --danger: #A4262C;
+      --danger-soft: #FDE7E9;
+      --warn: #FFB900;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.12);
+      --font: "Source Sans 3", "Segoe UI", sans-serif;
+      --display: "Source Serif 4", Georgia, serif;
+      --mono: "JetBrains Mono", Consolas, monospace;
+      --max: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(0, 120, 212, 0.08), transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(92, 45, 145, 0.07), transparent 35%),
+        linear-gradient(180deg, #F8FAFC 0%, var(--page) 240px, var(--page) 100%);
+      line-height: 1.6;
+    }
+
+    a { color: var(--az-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar__inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand__mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--az-blue), var(--az-purple));
+      display: grid;
+      place-items: center;
+      color: white;
+      box-shadow: var(--shadow);
+    }
+    .brand__text { font-size: 0.95rem; line-height: 1.2; }
+    .brand__text small {
+      display: block;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.9rem;
+      font-size: 0.88rem;
+    }
+    .topnav a { color: var(--muted); font-weight: 600; }
+    .topnav a:hover { color: var(--az-blue); text-decoration: none; }
+
+    .hero {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 1.5rem;
+    }
+    .hero__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--az-purple);
+      background: var(--az-purple-soft);
+      border: 1px solid #DEC7F0;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(1.9rem, 3.5vw, 2.75rem);
+      line-height: 1.15;
+      margin: 0 0 0.85rem;
+      max-width: 18ch;
+    }
+    .hero__lead {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 62ch;
+      margin: 0 0 1.4rem;
+    }
+    .audience {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .chip {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--muted);
+    }
+    .chip--blue { background: var(--az-blue-soft); border-color: #B3D7F2; color: var(--az-blue-dark); }
+    .chip--purple { background: var(--az-purple-soft); border-color: #DEC7F0; color: var(--az-purple); }
+    .chip--green { background: var(--az-green-soft); border-color: #B7DFB7; color: var(--az-green); }
+    .chip--gold { background: var(--az-gold-soft); border-color: #EAD98A; color: #8A6D00; }
+
+    .layout {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.25rem 4rem;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 2rem;
+    }
+    .toc {
+      position: sticky;
+      top: 78px;
+      align-self: start;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      max-height: calc(100vh - 100px);
+      overflow: auto;
+    }
+    .toc h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .toc ol {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.86rem;
+    }
+    .toc li { margin: 0.35rem 0; }
+    .toc a { color: var(--ink); }
+    .toc a:hover { color: var(--az-blue); }
+
+    .content section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.6rem 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .content h2 {
+      font-family: var(--display);
+      font-size: 1.55rem;
+      margin: 0 0 0.85rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 2px solid var(--line);
+    }
+    .content h3 {
+      font-size: 1.12rem;
+      margin: 1.4rem 0 0.6rem;
+      color: var(--az-blue-dark);
+    }
+    .content p { margin: 0 0 0.9rem; }
+    .content ul, .content ol { margin: 0 0 1rem; padding-left: 1.25rem; }
+    .content li { margin: 0.35rem 0; }
+
+    .callout {
+      border-radius: var(--radius);
+      padding: 0.95rem 1rem;
+      margin: 1rem 0;
+      border-left: 4px solid;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 0.75rem;
+      align-items: start;
+    }
+    .callout strong { display: block; margin-bottom: 0.2rem; }
+    .callout p { margin: 0; }
+    .callout--info { background: var(--az-blue-soft); border-color: var(--az-blue); }
+    .callout--secure { background: var(--az-purple-soft); border-color: var(--az-purple); }
+    .callout--success { background: var(--az-green-soft); border-color: var(--az-green); }
+    .callout--warn { background: var(--az-gold-soft); border-color: var(--az-gold); }
+    .callout--danger { background: var(--danger-soft); border-color: var(--danger); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .metric {
+      background: linear-gradient(180deg, #fff, #F8FAFC);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .metric__label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .metric__value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .diagram-frame {
+      background:
+        linear-gradient(180deg, #FBFDFF 0%, #F5F7FA 100%);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow-x: auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .diagram-frame svg {
+      display: block;
+      width: 100%;
+      min-width: 860px;
+      height: auto;
+    }
+    .diagram-caption {
+      margin: 0.65rem 0 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .infographic {
+      background: linear-gradient(135deg, #0B1F33 0%, #163A5F 45%, #2B1B4D 100%);
+      color: white;
+      border-radius: 14px;
+      padding: 1.4rem;
+      overflow-x: auto;
+    }
+    .infographic h3 {
+      color: white;
+      margin: 0 0 0.35rem;
+      font-family: var(--display);
+    }
+    .infographic p {
+      color: rgba(255,255,255,0.78);
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+    }
+    .infographic svg {
+      display: block;
+      width: 100%;
+      min-width: 920px;
+      height: auto;
+    }
+
+    pre, code { font-family: var(--mono); }
+    pre {
+      background: #1B1A19;
+      color: #F3F2F1;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      margin: 0.85rem 0 1rem;
+      box-shadow: var(--shadow);
+    }
+    code {
+      background: #F3F2F1;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .token-key { color: #9CDCFE; }
+    .token-str { color: #CE9178; }
+    .token-cmt { color: #6A9955; }
+    .token-hdr { color: #DCDCAA; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.85rem 0 1rem;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #F8FAFC;
+      font-weight: 700;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .checklist li {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 0.7rem;
+      align-items: start;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .checklist li:last-child { border-bottom: 0; }
+    .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--az-green);
+      display: grid;
+      place-items: center;
+      color: var(--az-green);
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem;
+    }
+    .security-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.95rem;
+      background: linear-gradient(180deg, #fff, #FAFBFC);
+    }
+    .security-card h4 {
+      margin: 0 0 0.35rem;
+      font-size: 0.98rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .security-card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+    .footer-note {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 1.25rem 3rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: static; max-height: none; }
+      .grid-2, .security-grid { grid-template-columns: 1fr; }
+      .topnav { display: none; }
+    }
+
+    @media print {
+      .topbar, .toc { display: none; }
+      .layout { grid-template-columns: 1fr; padding: 0; }
+      .content section { break-inside: avoid; box-shadow: none; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#top">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3l7 4v5c0 4.5-2.9 7.8-7 9-4.1-1.2-7-4.5-7-9V7l7-4z" stroke="white" stroke-width="1.8"/>
+            <path d="M9 12l2 2 4-4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <small>Enterprise Architecture</small>
+          Hybrid Payload Encryption
+        </span>
+      </a>
+      <nav class="topnav" aria-label="Quick links">
+        <a href="#architecture">Architecture</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#request-structure">Request</a>
+        <a href="#security">Security</a>
+        <a href="#infographic">Infographic</a>
+      </nav>
+    </div>
+  </header>
+
+  <header class="hero" id="top">
+    <div class="hero__eyebrow">AES-256-CBC + RSA · Hybrid Encryption</div>
+    <h1>Hybrid Payload Encryption Integration Guide</h1>
+    <p class="hero__lead">
+      A Microsoft Azure–style reference for Frontend Developers, API Developers, Security Architects,
+      and Integration Teams implementing per-request AES-256-CBC payload encryption with RSA-wrapped session keys.
+    </p>
+    <div class="audience" aria-label="Audience">
+      <span class="chip chip--blue">Frontend Developers</span>
+      <span class="chip chip--purple">API Developers</span>
+      <span class="chip chip--green">Security Architects</span>
+      <span class="chip chip--gold">Integration Teams</span>
+    </div>
+    <div class="grid-2">
+      <div class="metric">
+        <div class="metric__label">Symmetric layer</div>
+        <div class="metric__value">AES-256-CBC + random 16-byte IV</div>
+      </div>
+      <div class="metric">
+        <div class="metric__label">Asymmetric layer</div>
+        <div class="metric__value">RSA (X.509 public key) wraps AES key</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="toc" aria-label="Table of contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#executive-summary">Executive Summary</a></li>
+        <li><a href="#solution-overview">Solution Overview</a></li>
+        <li><a href="#architecture">Architecture Diagram</a></li>
+        <li><a href="#workflow">Encryption Workflow</a></li>
+        <li><a href="#frontend">Frontend Process</a></li>
+        <li><a href="#backend">Backend Process</a></li>
+        <li><a href="#iv-handling">IV Handling</a></li>
+        <li><a href="#request-structure">Request Structure</a></li>
+        <li><a href="#decryption">Decryption Process</a></li>
+        <li><a href="#security">Security Considerations</a></li>
+        <li><a href="#checklist">Implementation Checklist</a></li>
+        <li><a href="#examples">Example Payloads</a></li>
+        <li><a href="#infographic">One-Page Infographic</a></li>
+      </ol>
+    </aside>
+
+    <main class="content">
+      <!-- 1. Executive Summary -->
+      <section id="executive-summary">
+        <h2>1. Executive Summary</h2>
+        <p>
+          This guide documents a <strong>hybrid encryption</strong> pattern for protecting sensitive API payloads in transit
+          beyond TLS. Each request generates a fresh AES-256 session key and a random 16-byte IV. The JSON payload is
+          encrypted with AES-256-CBC; the AES key is then encrypted with the receiver’s X.509 RSA public key.
+        </p>
+        <p>
+          The encrypted AES key travels in the HTTP header <code>sessionKey</code>, the IV in header <code>iv</code>,
+          and the ciphertext in the request body. The backend recovers the AES key with its RSA private key, then
+          decrypts the payload with AES key + IV before business processing.
+        </p>
+        <div class="callout callout--secure">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="#5C2D91" stroke-width="2"/><rect x="5" y="11" width="14" height="10" rx="2" stroke="#5C2D91" stroke-width="2"/><circle cx="12" cy="16" r="1.5" fill="#5C2D91"/></svg>
+          </div>
+          <div>
+            <strong>Design intent</strong>
+            <p>Combine RSA’s key-distribution strength with AES’s performance for large payloads—without ever sending a plaintext AES key over the wire.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Solution Overview -->
+      <section id="solution-overview">
+        <h2>2. Solution Overview</h2>
+        <p>The solution separates concerns across three planes:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Plane</th>
+              <th>Color (Azure style)</th>
+              <th>Responsibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frontend / Client</strong></td>
+              <td>Blue</td>
+              <td>Generate AES key + IV, encrypt payload, wrap AES key with RSA public key, assemble request</td>
+            </tr>
+            <tr>
+              <td><strong>Encryption / Network</strong></td>
+              <td>Purple</td>
+              <td>HTTPS/TLS transport of headers (<code>sessionKey</code>, <code>iv</code>) and encrypted body</td>
+            </tr>
+            <tr>
+              <td><strong>Backend / Service</strong></td>
+              <td>Green</td>
+              <td>RSA unwrap of AES key, AES-CBC decrypt, validate and process business payload</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="legend" aria-label="Icon legend">
+          <span><i class="swatch" style="background:var(--az-gold)"></i> Gold = AES session key</span>
+          <span><i class="swatch" style="background:var(--az-purple)"></i> Purple = locks / RSA / TLS</span>
+          <span><i class="swatch" style="background:var(--az-blue)"></i> Blue = frontend / client</span>
+          <span><i class="swatch" style="background:var(--az-green)"></i> Green = backend success path</span>
+        </div>
+        <div class="callout callout--info">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0078D4" stroke-width="2"/><path d="M12 10v6M12 7.5v.5" stroke="#0078D4" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <strong>Audience fit</strong>
+            <p>Use this document for ADD (Architecture Design Document), SDR (Solution Design Review), and API integration onboarding.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Architecture Diagram -->
+      <section id="architecture">
+        <h2>3. Architecture Diagram</h2>
+        <p>
+          End-to-end flow from browser client through hybrid encryption packaging, TLS transport,
+          backend RSA/AES decryption, and business processing.
+        </p>
+        <div class="diagram-frame" role="img" aria-label="Hybrid encryption architecture diagram">
+          <svg viewBox="0 0 1100 720" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bgGrid" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#F7FBFF"/>
+                <stop offset="100%" stop-color="#F4F0FA"/>
+              </linearGradient>
+              <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#0078D4"/>
+              </marker>
+              <marker id="arrowPurple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#5C2D91"/>
+              </marker>
+              <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#107C10"/>
+              </marker>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-opacity="0.15"/>
+              </filter>
+            </defs>
+
+            <rect width="1100" height="720" fill="url(#bgGrid)" rx="12"/>
+
+            <!-- Swimlane labels -->
+            <rect x="24" y="20" width="520" height="36" rx="8" fill="#E6F2FB" stroke="#0078D4"/>
+            <text x="40" y="43" font-family="Segoe UI, Source Sans 3, sans-serif" font-size="14" font-weight="700" fill="#005A9E">FRONTEND (BLUE)</text>
+
+            <rect x="560" y="20" width="200" height="36" rx="8" fill="#F3EAFB" stroke="#5C2D91"/>
+            <text x="580" y="43" font-family="Segoe UI, Source Sans 3, sans-serif" font-size="14" font-weight="700" fill="#5C2D91">NETWORK (PURPLE)</text>
+
+            <rect x="780" y="20" width="296" height="36" rx="8" fill="#EAF6EA" stroke="#107C10"/>
+            <text x="800" y="43" font-family="Segoe UI, Source Sans 3, sans-serif" font-size="14" font-weight="700" fill="#107C10">BACKEND (GREEN)</text>
+
+            <!-- Frontend user -->
+            <g filter="url(#softShadow)">
+              <rect x="40" y="80" width="150" height="90" rx="10" fill="#FFFFFF" stroke="#0078D4" stroke-width="2"/>
+            </g>
+            <circle cx="75" cy="115" r="14" fill="#0078D4"/>
+            <path d="M60 152c4-16 26-16 30 0" fill="none" stroke="#0078D4" stroke-width="3"/>
+            <rect x="118" y="100" width="52" height="38" rx="4" fill="#E6F2FB" stroke="#0078D4"/>
+            <rect x="124" y="138" width="40" height="6" rx="2" fill="#0078D4"/>
+            <text x="115" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#005A9E" font-family="Segoe UI, sans-serif">Frontend User</text>
+            <text x="115" y="172" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">Browser / Laptop</text>
+
+            <!-- Generate AES key -->
+            <g filter="url(#softShadow)">
+              <rect x="230" y="75" width="150" height="100" rx="10" fill="#FFF8DB" stroke="#C19C00" stroke-width="2"/>
+            </g>
+            <!-- gold key -->
+            <circle cx="270" cy="115" r="14" fill="none" stroke="#C19C00" stroke-width="3"/>
+            <path d="M282 115h48m-10-8v16m-12-16v16" stroke="#C19C00" stroke-width="3" stroke-linecap="round"/>
+            <text x="305" y="150" text-anchor="middle" font-size="11" font-weight="700" fill="#8A6D00" font-family="Segoe UI, sans-serif">Generate AES</text>
+            <text x="305" y="164" text-anchor="middle" font-size="11" font-weight="700" fill="#8A6D00" font-family="Segoe UI, sans-serif">Session Key</text>
+
+            <!-- Generate IV -->
+            <g filter="url(#softShadow)">
+              <rect x="420" y="75" width="130" height="100" rx="10" fill="#E6F2FB" stroke="#0078D4" stroke-width="2"/>
+            </g>
+            <text x="485" y="118" text-anchor="middle" font-size="22" fill="#0078D4">🎲</text>
+            <text x="485" y="148" text-anchor="middle" font-size="11" font-weight="700" fill="#005A9E" font-family="Segoe UI, sans-serif">Generate IV</text>
+            <text x="485" y="162" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">16 random bytes</text>
+
+            <!-- Encrypt payload -->
+            <g filter="url(#softShadow)">
+              <rect x="160" y="220" width="200" height="120" rx="10" fill="#FFFFFF" stroke="#5C2D91" stroke-width="2"/>
+            </g>
+            <rect x="180" y="240" width="36" height="44" rx="3" fill="#F3EAFB" stroke="#5C2D91"/>
+            <path d="M188 252h20M188 260h16M188 268h22" stroke="#5C2D91" stroke-width="2"/>
+            <path d="M230 250h28v24c0 10-6 16-14 18-8-2-14-8-14-18v-24z" fill="#5C2D91"/>
+            <path d="M238 262v8m0 0l4-3m-4 3l-4-3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <text x="260" y="300" text-anchor="middle" font-size="11" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Encrypt JSON Payload</text>
+            <text x="260" y="316" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">{"data":"test"} → AES-256-CBC</text>
+            <text x="260" y="330" text-anchor="middle" font-size="10" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Encrypted Payload</text>
+
+            <!-- Encrypt AES key with RSA -->
+            <g filter="url(#softShadow)">
+              <rect x="400" y="220" width="200" height="120" rx="10" fill="#FFFFFF" stroke="#5C2D91" stroke-width="2"/>
+            </g>
+            <rect x="420" y="245" width="34" height="42" rx="3" fill="#FFF8DB" stroke="#C19C00"/>
+            <path d="M427 255h20M427 263h14M427 271h18" stroke="#C19C00" stroke-width="1.8"/>
+            <path d="M468 255c10 0 18 7 18 16s-8 16-18 16" fill="none" stroke="#5C2D91" stroke-width="2.5"/>
+            <circle cx="486" cy="271" r="10" fill="#F3EAFB" stroke="#5C2D91" stroke-width="2"/>
+            <path d="M486 266v10m-4-3h8" stroke="#5C2D91" stroke-width="1.6"/>
+            <text x="500" y="300" text-anchor="middle" font-size="11" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Encrypt AES Key (RSA)</text>
+            <text x="500" y="316" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">X.509 Public Key / Cert</text>
+            <text x="500" y="330" text-anchor="middle" font-size="10" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Encrypted AES Key</text>
+
+            <!-- Package request -->
+            <g filter="url(#softShadow)">
+              <rect x="250" y="380" width="280" height="110" rx="10" fill="#E6F2FB" stroke="#0078D4" stroke-width="2"/>
+            </g>
+            <rect x="275" y="400" width="40" height="32" rx="4" fill="#0078D4"/>
+            <path d="M283 412h24M283 420h16" stroke="white" stroke-width="2"/>
+            <text x="390" y="420" text-anchor="middle" font-size="12" font-weight="700" fill="#005A9E" font-family="Segoe UI, sans-serif">Package Request</text>
+            <text x="390" y="442" text-anchor="middle" font-size="10" fill="#323130" font-family="JetBrains Mono, Consolas, monospace">Header: sessionKey = Encrypted AES Key</text>
+            <text x="390" y="458" text-anchor="middle" font-size="10" fill="#323130" font-family="JetBrains Mono, Consolas, monospace">Header: iv = Base64 IV</text>
+            <text x="390" y="474" text-anchor="middle" font-size="10" fill="#323130" font-family="JetBrains Mono, Consolas, monospace">Body: Encrypted Payload</text>
+
+            <!-- HTTPS -->
+            <g filter="url(#softShadow)">
+              <rect x="580" y="380" width="160" height="110" rx="10" fill="#F3EAFB" stroke="#5C2D91" stroke-width="2"/>
+            </g>
+            <path d="M620 420c18-18 62-18 80 0" fill="none" stroke="#5C2D91" stroke-width="2.5"/>
+            <ellipse cx="660" cy="420" rx="28" ry="12" fill="#E6F2FB" stroke="#5C2D91"/>
+            <path d="M648 445h24v18c0 8-5 13-12 15-7-2-12-7-12-15v-18z" fill="#5C2D91"/>
+            <rect x="654" y="452" width="12" height="8" rx="1" fill="white"/>
+            <text x="660" y="480" text-anchor="middle" font-size="11" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">HTTPS / TLS</text>
+
+            <!-- Backend server -->
+            <g filter="url(#softShadow)">
+              <rect x="800" y="80" width="260" height="70" rx="10" fill="#FFFFFF" stroke="#107C10" stroke-width="2"/>
+            </g>
+            <rect x="820" y="98" width="36" height="34" rx="4" fill="#EAF6EA" stroke="#107C10"/>
+            <rect x="826" y="104" width="24" height="5" fill="#107C10"/>
+            <rect x="826" y="113" width="24" height="5" fill="#107C10"/>
+            <rect x="826" y="122" width="24" height="5" fill="#107C10"/>
+            <text x="930" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#107C10" font-family="Segoe UI, sans-serif">Backend Server</text>
+            <text x="930" y="130" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">API / Integration Service</text>
+
+            <!-- Decrypt AES key -->
+            <g filter="url(#softShadow)">
+              <rect x="800" y="180" width="260" height="70" rx="10" fill="#FFF8DB" stroke="#C19C00" stroke-width="2"/>
+            </g>
+            <text x="930" y="208" text-anchor="middle" font-size="12" font-weight="700" fill="#8A6D00" font-family="Segoe UI, sans-serif">Decrypt AES Key</text>
+            <text x="930" y="228" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">RSA Private Key → AES Session Key</text>
+
+            <!-- Decrypt payload -->
+            <g filter="url(#softShadow)">
+              <rect x="800" y="280" width="260" height="70" rx="10" fill="#F3EAFB" stroke="#5C2D91" stroke-width="2"/>
+            </g>
+            <text x="930" y="308" text-anchor="middle" font-size="12" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Decrypt Payload</text>
+            <text x="930" y="328" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">AES Key + IV → {"data":"test"}</text>
+
+            <!-- Process business -->
+            <g filter="url(#softShadow)">
+              <rect x="800" y="380" width="260" height="70" rx="10" fill="#EAF6EA" stroke="#107C10" stroke-width="2"/>
+            </g>
+            <circle cx="845" cy="415" r="16" fill="none" stroke="#107C10" stroke-width="3"/>
+            <path d="M845 403v8m0 16v8m-12-16h8m16 0h8" stroke="#107C10" stroke-width="2.5" stroke-linecap="round"/>
+            <text x="945" y="412" text-anchor="middle" font-size="12" font-weight="700" fill="#107C10" font-family="Segoe UI, sans-serif">Process Business Request</text>
+            <text x="945" y="430" text-anchor="middle" font-size="10" fill="#605E5C" font-family="Segoe UI, sans-serif">Validate &amp; execute use case</text>
+
+            <!-- Success -->
+            <g filter="url(#softShadow)">
+              <rect x="800" y="480" width="260" height="70" rx="10" fill="#107C10"/>
+            </g>
+            <circle cx="845" cy="515" r="16" fill="white"/>
+            <path d="M837 515l5 5 12-12" fill="none" stroke="#107C10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="955" y="520" text-anchor="middle" font-size="13" font-weight="700" fill="white" font-family="Segoe UI, sans-serif">Payload Ready for Processing</text>
+
+            <!-- Arrows frontend -->
+            <line x1="190" y1="125" x2="228" y2="125" stroke="#0078D4" stroke-width="2" marker-end="url(#arrowBlue)"/>
+            <line x1="380" y1="125" x2="418" y2="125" stroke="#0078D4" stroke-width="2" marker-end="url(#arrowBlue)"/>
+            <path d="M305 175v40" stroke="#C19C00" stroke-width="2" marker-end="url(#arrowPurple)"/>
+            <path d="M485 175v40" stroke="#0078D4" stroke-width="2" marker-end="url(#arrowBlue)"/>
+            <path d="M260 340v40" stroke="#5C2D91" stroke-width="2" marker-end="url(#arrowPurple)"/>
+            <path d="M500 340v40" stroke="#5C2D91" stroke-width="2" marker-end="url(#arrowPurple)"/>
+            <line x1="530" y1="435" x2="578" y2="435" stroke="#5C2D91" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+            <path d="M740 435h40v-320h18" stroke="#5C2D91" stroke-width="2.5" fill="none" marker-end="url(#arrowGreen)"/>
+            <line x1="930" y1="150" x2="930" y2="178" stroke="#107C10" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            <line x1="930" y1="250" x2="930" y2="278" stroke="#107C10" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            <line x1="930" y1="350" x2="930" y2="378" stroke="#107C10" stroke-width="2" marker-end="url(#arrowGreen)"/>
+            <line x1="930" y1="450" x2="930" y2="478" stroke="#107C10" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+            <!-- Footer note -->
+            <text x="550" y="690" text-anchor="middle" font-size="12" fill="#605E5C" font-family="Segoe UI, sans-serif">
+              Hybrid model: AES-256-CBC for payload speed · RSA (X.509) for session-key confidentiality · TLS for transport
+            </text>
+          </svg>
+        </div>
+        <p class="diagram-caption">Figure 1 — Hybrid payload encryption architecture (Azure visual language)</p>
+      </section>
+
+      <!-- 4. Encryption Workflow -->
+      <section id="workflow">
+        <h2>4. Encryption Workflow</h2>
+        <ol>
+          <li><strong>Generate AES-256 session key</strong> — cryptographically secure random 32-byte key (per request).</li>
+          <li><strong>Generate IV</strong> — cryptographically secure random 16-byte initialization vector (per request).</li>
+          <li><strong>Encrypt payload</strong> — AES-256-CBC over the JSON body (e.g. <code>{"data":"test"}</code>).</li>
+          <li><strong>Wrap AES key</strong> — encrypt the AES key with the receiver’s RSA public key from an X.509 certificate.</li>
+          <li><strong>Assemble HTTP request</strong> — set <code>sessionKey</code> and <code>iv</code> headers; place ciphertext in the body.</li>
+          <li><strong>Transmit over HTTPS</strong> — TLS protects headers and body in transit.</li>
+          <li><strong>Backend unwrap &amp; decrypt</strong> — RSA private key recovers AES key; AES + IV recovers plaintext.</li>
+          <li><strong>Process business request</strong> — validated plaintext is ready for application logic.</li>
+        </ol>
+        <div class="callout callout--warn">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="#C19C00" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5M12 17.5v.5" stroke="#C19C00" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <strong>Non-negotiable rule</strong>
+            <p>Generate a <em>new</em> AES key and a <em>new</em> IV for every encryption operation. Never reuse either value across requests.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Frontend Process -->
+      <section id="frontend">
+        <h2>5. Frontend Process</h2>
+        <p>Client-side responsibilities (browser, mobile, or BFF acting as encrypting client):</p>
+        <ol>
+          <li>Load and trust the receiver’s <strong>X.509 RSA public certificate</strong> (pin or fetch from a controlled endpoint).</li>
+          <li>Generate a random <strong>AES-256</strong> key using a CSPRNG (<code>crypto.getRandomValues</code> / platform equivalent).</li>
+          <li>Generate a random <strong>16-byte IV</strong>.</li>
+          <li>Serialize the business JSON, then encrypt with <strong>AES-256-CBC</strong> using the session key and IV.</li>
+          <li>Base64-encode (or otherwise encode as agreed) the ciphertext and IV.</li>
+          <li>RSA-encrypt the AES key with the public key; encode for the <code>sessionKey</code> header.</li>
+          <li>Send <code>POST</code> (or required verb) with headers + encrypted body over HTTPS.</li>
+        </ol>
+        <pre><code><span class="token-cmt">// Pseudocode — frontend encryption steps</span>
+<span class="token-key">const</span> aesKey = generateAes256Key();          <span class="token-cmt">// 32 bytes, CSPRNG</span>
+<span class="token-key">const</span> iv     = generateIv();                 <span class="token-cmt">// 16 bytes, CSPRNG</span>
+<span class="token-key">const</span> cipher = aes256CbcEncrypt(json, aesKey, iv);
+<span class="token-key">const</span> wrappedKey = rsaEncrypt(aesKey, receiverPublicKey);
+
+headers[<span class="token-str">"sessionKey"</span>] = base64(wrappedKey);
+headers[<span class="token-str">"iv"</span>]         = base64(iv);
+body = { <span class="token-key">encryptedPayload</span>: base64(cipher) };</code></pre>
+      </section>
+
+      <!-- 6. Backend Process -->
+      <section id="backend">
+        <h2>6. Backend Process</h2>
+        <p>Server-side responsibilities:</p>
+        <ol>
+          <li>Accept HTTPS request; extract <code>sessionKey</code>, <code>iv</code>, and encrypted body.</li>
+          <li>Decode header values from Base64 (or agreed encoding).</li>
+          <li>Decrypt <code>sessionKey</code> with the <strong>RSA private key</strong> to recover the AES session key.</li>
+          <li>Decrypt the body ciphertext with <strong>AES-256-CBC</strong> using recovered key + IV.</li>
+          <li>Parse JSON, validate schema/business rules, process the request.</li>
+          <li>Return a normal (or similarly protected) API response per contract.</li>
+        </ol>
+        <div class="callout callout--success">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#107C10" stroke-width="2"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke="#107C10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <strong>Success state</strong>
+            <p>When decryption and validation succeed, the payload is marked <em>Ready for Processing</em> and handed to business services.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. IV Handling -->
+      <section id="iv-handling">
+        <h2>7. IV Handling</h2>
+        <p>
+          The Initialization Vector (IV) randomizes ciphertext so identical plaintexts never produce identical ciphertexts
+          under the same key. CBC mode requires a unique IV per encryption with a given key.
+        </p>
+        <div class="diagram-frame" role="img" aria-label="IV lifecycle diagram">
+          <svg viewBox="0 0 1050 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="ivArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#5C2D91"/>
+              </marker>
+            </defs>
+            <rect width="1050" height="260" rx="12" fill="#FBFDFF"/>
+
+            <text x="525" y="36" text-anchor="middle" font-size="16" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">IV Lifecycle</text>
+
+            <!-- Step boxes -->
+            <g>
+              <rect x="30" y="70" width="170" height="90" rx="10" fill="#E6F2FB" stroke="#0078D4" stroke-width="2"/>
+              <text x="115" y="108" text-anchor="middle" font-size="20">🎲</text>
+              <text x="115" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#005A9E" font-family="Segoe UI, sans-serif">Generate</text>
+              <text x="115" y="150" text-anchor="middle" font-size="11" fill="#605E5C" font-family="Segoe UI, sans-serif">Random IV</text>
+            </g>
+            <line x1="200" y1="115" x2="230" y2="115" stroke="#5C2D91" stroke-width="2.5" marker-end="url(#ivArrow)"/>
+
+            <g>
+              <rect x="240" y="70" width="170" height="90" rx="10" fill="#F3EAFB" stroke="#5C2D91" stroke-width="2"/>
+              <text x="325" y="108" text-anchor="middle" font-size="20">🔒</text>
+              <text x="325" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#5C2D91" font-family="Segoe UI, sans-serif">Use with AES</text>
+              <text x="325" y="150" text-anchor="middle" font-size="11" fill="#605E5C" font-family="Segoe UI, sans-serif">Encryption</text>
+            </g>
+            <line x1="410" y1="115" x2="440" y2="115" stroke="#5C2D91" stroke-width="2.5" marker-end="url(#ivArrow)"/>
+
+            <g>
+              <rect x="450" y="70" width="170" height="90" rx="10" fill="#E6F2FB" stroke="#0078D4" stroke-width="2"/>
+              <text x="535" y="108" text-anchor="middle" font-size="20">📨</text>
+              <text x="535" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#005A9E" font-family="Segoe UI, sans-serif">Send via</text>
+              <text x="535" y="150" text-anchor="middle" font-size="11" fill="#605E5C" font-family="Segoe UI, sans-serif">HTTP Header <tspan font-family="Consolas, monospace">iv</tspan></text>
+            </g>
+            <line x1="620" y1="115" x2="650" y2="115" stroke="#5C2D91" stroke-width="2.5" marker-end="url(#ivArrow)"/>
+
+            <g>
+              <rect x="660" y="70" width="170" height="90" rx="10" fill="#EAF6EA" stroke="#107C10" stroke-width="2"/>
+              <text x="745" y="108" text-anchor="middle" font-size="20">🖥️</text>
+              <text x="745" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#107C10" font-family="Segoe UI, sans-serif">Backend</text>
+              <text x="745" y="150" text-anchor="middle" font-size="11" fill="#605E5C" font-family="Segoe UI, sans-serif">Receives IV</text>
+            </g>
+            <line x1="830" y1="115" x2="860" y2="115" stroke="#5C2D91" stroke-width="2.5" marker-end="url(#ivArrow)"/>
+
+            <g>
+              <rect x="870" y="70" width="150" height="90" rx="10" fill="#EAF6EA" stroke="#107C10" stroke-width="2"/>
+              <text x="945" y="108" text-anchor="middle" font-size="20">🔓</text>
+              <text x="945" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#107C10" font-family="Segoe UI, sans-serif">Use with AES</text>
+              <text x="945" y="150" text-anchor="middle" font-size="11" fill="#605E5C" font-family="Segoe UI, sans-serif">Decryption</text>
+            </g>
+
+            <!-- Highlight note -->
+            <rect x="120" y="190" width="810" height="48" rx="8" fill="#FFF8DB" stroke="#C19C00" stroke-width="2"/>
+            <text x="525" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="#8A6D00" font-family="Segoe UI, sans-serif">
+              Note: The IV is not secret and must be generated for every encryption operation.
+            </text>
+          </svg>
+        </div>
+        <p class="diagram-caption">Figure 2 — IV lifecycle across encrypt → transmit → decrypt</p>
+        <ul>
+          <li>IV length for AES-CBC: <strong>16 bytes (128 bits)</strong>.</li>
+          <li>IV is transmitted in clear (Base64) via the <code>iv</code> header—confidentiality of IV is not required.</li>
+          <li>Uniqueness (and unpredictability) of IV <em>is</em> required; reuse with the same key is a critical vulnerability.</li>
+        </ul>
+      </section>
+
+      <!-- 8. Request Structure -->
+      <section id="request-structure">
+        <h2>8. Request Structure</h2>
+        <p>Canonical request shape for encrypted business calls:</p>
+        <pre><code><span class="token-hdr">POST /api/customer HTTP/1.1</span>
+<span class="token-key">Host</span>: api.example.com
+<span class="token-key">Content-Type</span>: application/json
+<span class="token-key">sessionKey</span>: &lt;RSA Encrypted AES Key&gt;
+<span class="token-key">iv</span>: &lt;Base64 Encoded IV&gt;
+
+{
+  <span class="token-str">"encryptedPayload"</span>: <span class="token-str">"&lt;AES Encrypted Cipher Text&gt;"</span>
+}</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>Element</th>
+              <th>Location</th>
+              <th>Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sessionKey</code></td>
+              <td>HTTP header</td>
+              <td>AES-256 key encrypted with receiver RSA public key (typically Base64)</td>
+            </tr>
+            <tr>
+              <td><code>iv</code></td>
+              <td>HTTP header</td>
+              <td>16-byte IV, Base64-encoded</td>
+            </tr>
+            <tr>
+              <td><code>encryptedPayload</code></td>
+              <td>JSON body</td>
+              <td>AES-256-CBC ciphertext of original JSON (Base64 or agreed encoding)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 9. Decryption Process -->
+      <section id="decryption">
+        <h2>9. Decryption Process</h2>
+        <ol>
+          <li>Read <code>sessionKey</code> and <code>iv</code> from headers; read <code>encryptedPayload</code> from body.</li>
+          <li>Base64-decode all three values.</li>
+          <li><strong>RSA decrypt</strong> <code>sessionKey</code> with the private key → plaintext AES-256 key.</li>
+          <li><strong>AES-256-CBC decrypt</strong> ciphertext using AES key + IV → original JSON bytes.</li>
+          <li>UTF-8 decode / JSON parse → e.g. <code>{"data":"test"}</code>.</li>
+          <li>Authorize, validate, and process the business request.</li>
+        </ol>
+        <pre><code><span class="token-cmt">// Pseudocode — backend decryption steps</span>
+<span class="token-key">const</span> wrappedKey = base64Decode(headers.sessionKey);
+<span class="token-key">const</span> iv         = base64Decode(headers.iv);
+<span class="token-key">const</span> cipher     = base64Decode(body.encryptedPayload);
+
+<span class="token-key">const</span> aesKey    = rsaDecrypt(wrappedKey, privateKey);
+<span class="token-key">const</span> plaintext = aes256CbcDecrypt(cipher, aesKey, iv);
+<span class="token-key">const</span> payload   = JSON.parse(plaintext);
+<span class="token-cmt">// → { "data": "test" }</span></code></pre>
+      </section>
+
+      <!-- 10. Security Considerations -->
+      <section id="security">
+        <h2>10. Security Considerations</h2>
+        <div class="security-grid">
+          <div class="security-card">
+            <h4>🔑 New AES key per request</h4>
+            <p>Never reuse AES session keys across requests or messages.</p>
+          </div>
+          <div class="security-card">
+            <h4>🎲 New IV per request</h4>
+            <p>Never reuse an IV with the same AES key. Generate a fresh 16-byte IV every time.</p>
+          </div>
+          <div class="security-card">
+            <h4>🛡️ Protect RSA private key</h4>
+            <p>Store private keys in HSM/Key Vault/KMS. Restrict process access and rotate on schedule.</p>
+          </div>
+          <div class="security-card">
+            <h4>🔒 Always use HTTPS</h4>
+            <p>TLS is mandatory. Hybrid encryption complements—not replaces—transport security.</p>
+          </div>
+          <div class="security-card">
+            <h4>📜 AES key via RSA public key</h4>
+            <p>Only the holder of the matching private key can recover the session key.</p>
+          </div>
+          <div class="security-card">
+            <h4>📦 Payload via AES-256-CBC</h4>
+            <p>Bulk data stays on the fast symmetric path after the key is wrapped asymmetrically.</p>
+          </div>
+        </div>
+        <div class="callout callout--danger" style="margin-top:1rem">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#A4262C" stroke-width="2"/><path d="M12 7v6M12 16.5v.5" stroke="#A4262C" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <strong>Additional hardening recommendations</strong>
+            <p>
+              Prefer authenticated encryption (e.g. AES-GCM) if the platform allows a future evolution; with CBC, ensure
+              PKCS#7 padding validation is constant-time and consider an HMAC or AEAD layer to prevent padding-oracle class attacks.
+              Pin certificates where feasible; reject weak RSA key sizes (&lt; 2048 bits).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. Implementation Checklist -->
+      <section id="checklist">
+        <h2>11. Implementation Checklist</h2>
+        <ul class="checklist">
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Certificate distribution</strong> — Frontend has the correct receiver X.509 RSA public key; trust store / pin defined.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>CSPRNG</strong> — AES key (32 bytes) and IV (16 bytes) generated with a cryptographically secure RNG.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>AES-256-CBC encrypt</strong> — Payload encrypted; ciphertext encoding agreed (Base64 recommended).</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>RSA wrap</strong> — AES key encrypted with public key; placed in <code>sessionKey</code> header.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>IV header</strong> — Base64 IV sent in <code>iv</code> header; never omitted.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>HTTPS only</strong> — Cleartext HTTP rejected in all environments (including lower envs where possible).</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Private key custody</strong> — Backend private key in vault/HSM; no keys in source control or logs.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Decrypt path</strong> — Backend unwraps AES key, decrypts payload, validates JSON schema.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>No reuse</strong> — Unit/integration tests assert new key + IV per request.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Observability</strong> — Log correlation IDs only; never log AES keys, private keys, or raw sensitive plaintext in shared logs.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Failure handling</strong> — Uniform error responses for decrypt failures to reduce oracle leakage.</div></li>
+          <li><span class="check" aria-hidden="true">✓</span><div><strong>Documentation handoff</strong> — ADD / SDR / client SDK notes updated with header names and example payloads.</div></li>
+        </ul>
+      </section>
+
+      <!-- 12. Example Payloads -->
+      <section id="examples">
+        <h2>12. Example Payloads</h2>
+        <h3>12.1 Original plaintext</h3>
+        <pre><code>{
+  <span class="token-str">"data"</span>: <span class="token-str">"test"</span>
+}</code></pre>
+
+        <h3>12.2 Formatted encrypted request</h3>
+        <pre><code><span class="token-hdr">POST /api/customer</span>
+<span class="token-key">sessionKey</span>: <span class="token-str">MIIBIjANBgkq...RSA-ENCRYPTED-AES-KEY...IDAQAB</span>
+<span class="token-key">iv</span>: <span class="token-str">8f3c1a9e0b7d4e21a6c5d8f901234567</span>   <span class="token-cmt"># illustrative Base64/hex form</span>
+<span class="token-key">Content-Type</span>: application/json
+
+{
+  <span class="token-str">"encryptedPayload"</span>: <span class="token-str">"pQ3+Yv8kLm...AES-256-CBC-CIPHERTEXT...=="</span>
+}</code></pre>
+
+        <h3>12.3 Conceptual wire view</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Example (illustrative)</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sessionKey</code></td>
+              <td><code>owEHok... (Base64 RSA ciphertext)</code></td>
+              <td>Only decryptable with backend private key</td>
+            </tr>
+            <tr>
+              <td><code>iv</code></td>
+              <td><code>k3n9Qx...==</code></td>
+              <td>Not secret; required for CBC decrypt</td>
+            </tr>
+            <tr>
+              <td><code>encryptedPayload</code></td>
+              <td><code>U2FsdGVk...==</code></td>
+              <td>AES-256-CBC over original JSON</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout--info">
+          <div aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 4h8l2 4H6l2-4z" stroke="#0078D4" stroke-width="2"/><rect x="5" y="8" width="14" height="12" rx="1.5" stroke="#0078D4" stroke-width="2"/><path d="M12 11v5" stroke="#0078D4" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <strong>Contract note</strong>
+            <p>
+              Exact Base64 vs hex encoding, RSA padding mode (OAEP recommended), and whether the body is a raw string or
+              a JSON wrapper field must be frozen in the API contract shared by frontend and backend teams.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. Infographic -->
+      <section id="infographic">
+        <h2>13. One-Page Infographic</h2>
+        <p>Executive visual summary suitable for ADD, SDR, and API integration packs.</p>
+        <div class="infographic" role="img" aria-label="One page hybrid encryption infographic">
+          <h3>Hybrid Payload Encryption at a Glance</h3>
+          <p>Frontend encrypts · HTTPS carries · Backend decrypts · Business processes</p>
+          <svg viewBox="0 0 1100 420" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="igArrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+                <path d="M0,0 L7,3.5 L0,7 Z" fill="#FFFFFF"/>
+              </marker>
+              <linearGradient id="nodeFront" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2B88D8"/>
+                <stop offset="100%" stop-color="#0078D4"/>
+              </linearGradient>
+              <linearGradient id="nodeEnc" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#8661C5"/>
+                <stop offset="100%" stop-color="#5C2D91"/>
+              </linearGradient>
+              <linearGradient id="nodeBack" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#13A10E"/>
+                <stop offset="100%" stop-color="#107C10"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Row 1: Frontend chain -->
+            <text x="40" y="40" fill="#9CDCFE" font-size="13" font-weight="700" font-family="Segoe UI, sans-serif">FRONTEND</text>
+
+            <g>
+              <rect x="40" y="55" width="120" height="88" rx="12" fill="url(#nodeFront)"/>
+              <text x="100" y="90" text-anchor="middle" font-size="22">💻</text>
+              <text x="100" y="118" text-anchor="middle" fill="white" font-size="12" font-weight="700" font-family="Segoe UI, sans-serif">Frontend</text>
+            </g>
+            <line x1="160" y1="99" x2="185" y2="99" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="190" y="55" width="120" height="88" rx="12" fill="#C19C00"/>
+              <text x="250" y="90" text-anchor="middle" font-size="22">🔑</text>
+              <text x="250" y="118" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">AES Key</text>
+            </g>
+            <line x1="310" y1="99" x2="335" y2="99" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="340" y="55" width="120" height="88" rx="12" fill="url(#nodeFront)"/>
+              <text x="400" y="90" text-anchor="middle" font-size="22">🎲</text>
+              <text x="400" y="118" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Generate IV</text>
+            </g>
+            <line x1="460" y1="99" x2="485" y2="99" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="490" y="55" width="130" height="88" rx="12" fill="url(#nodeEnc)"/>
+              <text x="555" y="90" text-anchor="middle" font-size="22">🔒</text>
+              <text x="555" y="118" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Encrypt Payload</text>
+            </g>
+            <line x1="620" y1="99" x2="645" y2="99" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="650" y="55" width="140" height="88" rx="12" fill="url(#nodeEnc)"/>
+              <text x="720" y="85" text-anchor="middle" font-size="20">📜</text>
+              <text x="720" y="110" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Encrypt AES Key</text>
+              <text x="720" y="126" text-anchor="middle" fill="#E0D4F5" font-size="10" font-family="Segoe UI, sans-serif">RSA Certificate</text>
+            </g>
+            <line x1="790" y1="99" x2="815" y2="99" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="820" y="55" width="140" height="88" rx="12" fill="url(#nodeFront)"/>
+              <text x="890" y="85" text-anchor="middle" font-size="20">📦</text>
+              <text x="890" y="110" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Send Request</text>
+              <text x="890" y="126" text-anchor="middle" fill="#D0E7F8" font-size="10" font-family="Segoe UI, sans-serif">Headers + Body</text>
+            </g>
+
+            <!-- HTTPS bar -->
+            <rect x="40" y="175" width="920" height="54" rx="12" fill="url(#nodeEnc)"/>
+            <text x="80" y="208" font-size="20">☁️</text>
+            <text x="120" y="200" fill="white" font-size="14" font-weight="700" font-family="Segoe UI, sans-serif">HTTPS / TLS Transmission</text>
+            <text x="120" y="218" fill="#E0D4F5" font-size="11" font-family="Segoe UI, sans-serif">Shielded channel · sessionKey + iv headers · encryptedPayload body</text>
+            <text x="900" y="208" font-size="22">🛡️</text>
+
+            <!-- Backend chain -->
+            <text x="40" y="270" fill="#9AD29A" font-size="13" font-weight="700" font-family="Segoe UI, sans-serif">BACKEND</text>
+
+            <g>
+              <rect x="40" y="285" width="150" height="88" rx="12" fill="url(#nodeBack)"/>
+              <text x="115" y="320" text-anchor="middle" font-size="22">🖥️</text>
+              <text x="115" y="348" text-anchor="middle" fill="white" font-size="12" font-weight="700" font-family="Segoe UI, sans-serif">Backend</text>
+            </g>
+            <line x1="190" y1="329" x2="220" y2="329" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="230" y="285" width="170" height="88" rx="12" fill="#C19C00"/>
+              <text x="315" y="320" text-anchor="middle" font-size="22">🔑</text>
+              <text x="315" y="348" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Decrypt AES Key</text>
+            </g>
+            <line x1="400" y1="329" x2="430" y2="329" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="440" y="285" width="170" height="88" rx="12" fill="url(#nodeEnc)"/>
+              <text x="525" y="320" text-anchor="middle" font-size="22">🔓</text>
+              <text x="525" y="348" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Decrypt Payload</text>
+            </g>
+            <line x1="610" y1="329" x2="640" y2="329" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="650" y="285" width="170" height="88" rx="12" fill="url(#nodeBack)"/>
+              <text x="735" y="320" text-anchor="middle" font-size="22">⚙️</text>
+              <text x="735" y="348" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Process Payload</text>
+            </g>
+            <line x1="820" y1="329" x2="850" y2="329" stroke="white" stroke-width="2.5" marker-end="url(#igArrow)"/>
+
+            <g>
+              <rect x="860" y="285" width="140" height="88" rx="12" fill="#0B6A0B"/>
+              <text x="930" y="320" text-anchor="middle" font-size="22">✅</text>
+              <text x="930" y="348" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Segoe UI, sans-serif">Ready</text>
+            </g>
+
+            <text x="550" y="405" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="12" font-family="Segoe UI, sans-serif">
+              AES-256-CBC payload · RSA-wrapped session key · Per-request key + IV · HTTPS always
+            </text>
+          </svg>
+        </div>
+        <p class="diagram-caption">Figure 3 — One-page integration infographic</p>
+      </section>
+    </main>
+  </div>
+
+  <p class="footer-note">
+    Hybrid Payload Encryption Integration Guide (AES-256-CBC + RSA) · Enterprise Architecture Documentation ·
+    For Frontend, API, Security, and Integration teams · Azure visual language reference
+  </p>
+</body>
+</html>
