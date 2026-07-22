@@ -979,27 +979,27 @@ body = { <span class="token-key">encryptedPayload</span>: base64(cipher) };</cod
         <h2>10. Security Considerations</h2>
         <div class="security-grid">
           <div class="security-card">
-            <h4>🔑 New AES key per request</h4>
+            <h4>New AES key per request</h4>
             <p>Never reuse AES session keys across requests or messages.</p>
           </div>
           <div class="security-card">
-            <h4>🎲 New IV per request</h4>
+            <h4>New IV per request</h4>
             <p>Never reuse an IV with the same AES key. Generate a fresh 16-byte IV every time.</p>
           </div>
           <div class="security-card">
-            <h4>🛡️ Protect RSA private key</h4>
+            <h4>Protect RSA private key</h4>
             <p>Store private keys in HSM/Key Vault/KMS. Restrict process access and rotate on schedule.</p>
           </div>
           <div class="security-card">
-            <h4>🔒 Always use HTTPS</h4>
+            <h4>Always use HTTPS</h4>
             <p>TLS is mandatory. Hybrid encryption complements—not replaces—transport security.</p>
           </div>
           <div class="security-card">
-            <h4>📜 AES key via RSA public key</h4>
+            <h4>AES key via RSA public key</h4>
             <p>Only the holder of the matching private key can recover the session key.</p>
           </div>
           <div class="security-card">
-            <h4>📦 Payload via AES-256-CBC</h4>
+            <h4>Payload via AES-256-CBC</h4>
             <p>Bulk data stays on the fast symmetric path after the key is wrapped asymmetrically.</p>
           </div>
         </div>
