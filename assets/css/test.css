@@ -414,11 +414,11 @@ hr {
 .hero-section {
   position: relative;
   overflow: hidden;
-  min-height: min(72vh, 620px);
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3xl) var(--spacing-md);
+  padding: var(--spacing-2xl) var(--spacing-md);
   background:
     radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20, 184, 166, 0.22), transparent 55%),
     linear-gradient(160deg, #0a1218 0%, #13202b 48%, #0f1a22 100%);
@@ -455,21 +455,21 @@ hr {
 }
 
 .hero-brand {
-  margin: 0 0 var(--spacing-lg);
+  margin: 0 0 var(--spacing-sm);
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 7vw, 4.5rem);
+  font-size: clamp(2rem, 4.5vw, 2.85rem);
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   color: var(--color-white);
 }
 
 .hero-support {
-  margin: 0 auto var(--spacing-xl);
-  max-width: 34rem;
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  margin: 0 auto var(--spacing-lg);
+  max-width: 32rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
   color: #b8c5d1;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .hero-actions {
@@ -1253,8 +1253,8 @@ tbody tr:nth-child(even) {
   }
 
   .hero-section {
-    min-height: min(64vh, 520px);
-    padding: var(--spacing-2xl) var(--spacing-md);
+    min-height: 0;
+    padding: var(--spacing-xl) var(--spacing-md);
   }
 
   .single-post,
