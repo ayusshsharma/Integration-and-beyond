@@ -1,0 +1,33 @@
+<header class="site-header" role="banner">
+  <div class="site-header__inner">
+
+    <div class="site-branding">
+      <p class="site-title">
+        <a href="{{ '/test/' | relative_url }}" rel="home">{{ site.title }}</a>
+      </p>
+      <p class="site-description">{{ site.description }}</p>
+    </div>
+
+    <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false" aria-label="Toggle menu">
+      <span class="menu-toggle__bars" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+
+    <nav class="main-navigation" id="primary-menu" role="navigation" aria-label="Primary Navigation">
+      <ul>
+        {% assign path = page.url %}
+        <li{% if path == '/test/' or path == '/test' %} class="is-current"{% endif %}>
+          <a href="{{ '/test/' | relative_url }}">Home</a>
+        </li>
+        <li{% if path == '/test/about/' %} class="is-current"{% endif %}>
+          <a href="{{ '/test/about/' | relative_url }}">About</a>
+        </li>
+        <li{% if path == '/test/blog/' or path contains '/test/p/' or path contains '/test/category/' %} class="is-current"{% endif %}>
+          <a href="{{ '/test/blog/' | relative_url }}">Blog</a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+</header>

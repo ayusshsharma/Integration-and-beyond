@@ -1,0 +1,29 @@
+---
+layout: test-default
+---
+<main class="site-main" role="main">
+  <div class="content-wrapper">
+    <div class="content-area">
+      <header class="section-header section-header--page">
+        <h1 class="section-header__title">{{ page.category_name }}</h1>
+      </header>
+      <div class="posts-grid">
+        {% for post in site.posts %}
+          {% if post.categories contains page.category_name %}
+            <article class="post-card">
+              <div class="post-card__meta">
+                <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %d, %Y" }}</time>
+              </div>
+              <h2 class="post-card__title">
+                <a href="{{ '/test/p/' | append: post.slug | append: '/' | relative_url }}">{{ post.title }}</a>
+              </h2>
+              <div class="post-card__excerpt">{{ post.excerpt }}</div>
+              <a class="read-more" href="{{ '/test/p/' | append: post.slug | append: '/' | relative_url }}">Read more</a>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% include test/sidebar.html %}
+  </div>
+</main>
