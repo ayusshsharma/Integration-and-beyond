@@ -2,6 +2,7 @@
 layout: post
 title: "Enforcing Rate limits using dynamic keys from request headers"
 date: 2026-07-13 11:15:00 +0400
+description: "Use named assembly rate limits in IBM API Connect and consume the right quota at runtime from an opname request header."
 categories: [IBM API Connect]
 tags: [api-connect, rate-limiting, assembly, headers, ibm]
 ---
@@ -9,6 +10,8 @@ tags: [api-connect, rate-limiting, assembly, headers, ibm]
 Not every API call should cost the same against your quota. A lightweight **create** is different from a heavy **update** or a destructive **delete** — yet many teams apply a single flat rate limit at the gateway and wonder why burst traffic still overwhelms backends.
 
 In IBM API Connect, you can define **named assembly rate limits** on an API plan and then **consume the right limit at runtime** based on a value from the request — in my case, the **opname** header. Here is the pattern I use.
+
+<!--more-->
 
 ## The Problem
 
