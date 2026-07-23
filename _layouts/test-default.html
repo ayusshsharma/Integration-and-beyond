@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include test/head.html %}
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }} (UI Preview)</title>
+</head>
+<body class="test-theme layout-{{ page.layout }}">
+
+<div class="preview-banner" role="note">
+  <span>UI preview at <code>/test</code> — live site styles unchanged</span>
+  <a href="{{ '/' | relative_url }}">Back to live site</a>
+</div>
+
+<div class="site-container">
+  {% include test/header.html %}
+  {{ content }}
+  {% include test/footer.html %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="{{ '/assets/js/test.js' | relative_url }}"></script>
+</body>
+</html>

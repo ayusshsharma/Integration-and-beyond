@@ -1,0 +1,31 @@
+<aside class="sidebar" role="complementary" aria-label="Sidebar">
+
+  <section class="widget widget_categories">
+    <h2 class="widget-title">Categories</h2>
+    <ul>
+      {% for cat in site.category_names %}
+        {% assign count = 0 %}
+        {% for post in site.posts %}
+          {% if post.categories contains cat %}
+            {% assign count = count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        <li class="cat-item">
+          {% assign cat_url = cat | slugify | prepend: "/test/category/" | append: "/" %}
+          <a href="{{ cat_url | relative_url }}">{{ cat }}</a>
+          <span class="category-count">{{ count }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="widget widget_recent_entries">
+    <h2 class="widget-title">Recent Posts</h2>
+    <ul>
+      {% for post in site.posts limit:5 %}
+        <li><a href="{{ '/test/p/' | append: post.slug | append: '/' | relative_url }}">{{ post.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+</aside>

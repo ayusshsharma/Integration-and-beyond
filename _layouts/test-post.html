@@ -1,0 +1,54 @@
+---
+layout: test-default
+---
+{% assign preview_post = nil %}
+{% for post in site.posts %}
+  {% if post.slug == page.post_slug %}
+    {% assign preview_post = post %}
+  {% endif %}
+{% endfor %}
+
+<main class="site-main" role="main">
+  <div class="content-wrapper">
+    <div class="content-area">
+      {% if preview_post %}
+      <article class="single-post">
+        <header class="single-post__header">
+          <h1 class="single-post__title">{{ preview_post.title }}</h1>
+          <div class="single-post__meta">
+            {% if preview_post.categories.first %}
+              <span class="single-post__category">
+                <a class="post-card__category" href="{{ preview_post.categories.first | slugify | prepend: '/test/category/' | append: '/' | relative_url }}">
+                  {{ preview_post.categories.first }}
+                </a>
+              </span>
+            {% endif %}
+            <time datetime="{{ preview_post.date | date_to_xmlschema }}">{{ preview_post.date | date: "%B %d, %Y" }}</time>
+            <span class="single-post__author">By {{ site.author }}</span>
+          </div>
+          {% if preview_post.tags.size > 0 %}
+            <div class="single-post__tags">
+              {% for tag in preview_post.tags %}
+                <span class="tag-link">#{{ tag }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </header>
+        <nav class="table-of-contents" id="toc" aria-label="Table of Contents" hidden>
+          <h2 class="table-of-contents__title">On this page</h2>
+          <ol id="toc-list"></ol>
+        </nav>
+        <div class="single-post__content">
+          {{ preview_post.content }}
+        </div>
+      </article>
+      {% else %}
+      <article class="page-content">
+        <h1 class="page-content__title">Post not found</h1>
+        <p>This preview could not locate the source post.</p>
+      </article>
+      {% endif %}
+    </div>
+    {% include test/sidebar.html %}
+  </div>
+</main>
