@@ -20,7 +20,98 @@ Governance is an add-on available from API Connect **v10.0.6** onward. Enable it
 Write a ruleset that makes an OAuth2 security definition mandatory, requires it to reference a registered OAuth2 provider, requires scopes, disallows the implicit grant, and blocks operation-level security overrides. Use your exact ruleset YAML:
 
 ```yaml
-# [paste ruleset YAML here]
+name: mybank-oauth-check
+title: myBank-oauth-check
+description: ""
+ruleset_version: 1.0.0
+
+rules:
+  - title: no-implicit-grant-type
+    id: 4cf01579-a7f6-4ac2-8bf9-7ab41da14162
+    name: no-implicit-grant-type
+    version: 1.0.0
+    description: Implicit grant is disallowed org-wide.
+    given:
+      $.securityDefinitions[?(@.type=='oauth2')]
+    severity: error
+    then:
+      - function: schema
+        functionOptions:
+          schema:
+            type: object
+            required:
+              - flow
+            properties:
+              flow:
+                not:
+                  enum:
+                    - implicit
+                type: string
+
+  - title: no-operation-level-security-bypass
+    id: 85d45013-144e-4bbb-915e-b253a505512a
+    name: no-operation-level-security-bypass
+    version: 1.0.0
+    description: No operation may override the API-level requirement with an empty security array.
+    given:
+      $.paths[*][*].security
+    severity: error
+    then:
+      - function: schema
+        functionOptions:
+          schema:
+            type: array
+            minItems: 1
+
+  - title: oauth-provider-registered
+    id: 94fcbbe3-eac5-4191-b63d-2778a85b874b
+    name: oauth-provider-registered
+    version: 1.0.0
+    description: Every security definition must reference the approved myBank OAuth2 provider.
+    given:
+      $.securityDefinitions[*]
+    severity: error
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - x-ibm-oauth-provider
+          properties:
+            x-ibm-oauth-provider:
+              type: string
+              pattern: ^inEdgeOAuth2Provider-\d+\.\d+\.\d+-[a-f0-9]{4}$
+
+  - title: oauth-required-scopes-defined
+    id: 689ad9c9-d3e5-4c23-88d2-346d8d808e03
+    name: oauth-required-scopes-defined
+    version: 1.0.0
+    description: Every OAuth2 security definition must declare at least one explicit scope.
+    given:
+      $.securityDefinitions[*]
+    severity: error
+    then:
+      field: scopes
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          minProperties: 1
+
+  - title: oauth-security-definition
+    id: 84743e6e-3064-4384-88f0-d1ef2d4766a
+    name: oauth-security-definition
+    version: 1.0.0
+    description: OAuth2 Provider not defined.
+    given:
+      $.securityDefinitions[*]
+    severity: error
+    then:
+      field: type
+      function: pattern
+      functionOptions:
+        match: ^oauth2$
 ```
 
 ## Step 3 — Publish the ruleset to the provider org
