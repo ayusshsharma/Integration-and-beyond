@@ -124,7 +124,7 @@ rules:
 
 Save and publish the ruleset so it becomes available for validation scans in the provider org.
 
-**Bonus:** adidas publishes its OpenAPI (OAS) Spectral rules publicly — a useful reference when designing your own org checks: [adidas/api-guidelines `.spectral.yml`](https://github.com/adidas/api-guidelines/blob/master/.spectral.yml).
+**Bonus:** adidas publishes its OpenAPI (OAS) Spectral rules publicly — a useful reference when designing your own org checks: [adidas/api-guidelines .spectral.yml](https://github.com/adidas/api-guidelines/blob/master/.spectral.yml).
 
 ## Step 2 — Select the Rules for Validation
 
