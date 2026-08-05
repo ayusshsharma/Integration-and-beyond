@@ -25,6 +25,8 @@ The **mybank-oauth-check** ruleset requires every API to:
 
 In the provider org, open **API Governance → Rulesets** and create a new ruleset named **mybank-oauth-check** (version **1.0.0**). Paste the rules below, or import the YAML as a ruleset file.
 
+> **Note:** API Connect Governance rulesets are based on the open-source [Spectral](https://github.com/stoplightio/spectral) linter. The **given** / **then** / **severity** shape you write here is the same Spectral rule model — API Connect runs those checks as governance scans and scorecards.
+
 ```yaml
 name: mybank-oauth-check
 title: myBank-oauth-check
@@ -121,6 +123,8 @@ rules:
 ```
 
 Save and publish the ruleset so it becomes available for validation scans in the provider org.
+
+**Bonus:** adidas publishes its OpenAPI (OAS) Spectral rules publicly — a useful reference when designing your own org checks: [adidas/api-guidelines .spectral.yml](https://github.com/adidas/api-guidelines/blob/master/.spectral.yml).
 
 ## Step 2 — Select the Rules for Validation
 
