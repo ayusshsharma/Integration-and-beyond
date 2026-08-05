@@ -13,10 +13,10 @@ IBM API Connect Governance turns security policy into machine-checkable rules. T
 
 ## What We Are Enforcing
 
-The `mybank-oauth-check` ruleset requires every API to:
+The **mybank-oauth-check** ruleset requires every API to:
 
-- Use an **OAuth2** security definition (`type` must match `oauth2`)
-- Reference the approved myBank provider via `x-ibm-oauth-provider`
+- Use an **OAuth2** security definition (**type** must match **oauth2**)
+- Reference the approved myBank provider via **x-ibm-oauth-provider**
 - Declare at least one explicit **scope**
 - Never use the **implicit** grant
 - Never clear security at the operation level with an empty array
@@ -124,17 +124,17 @@ Save and publish the ruleset so it becomes available for validation scans in the
 
 ## Step 2 — Select the Rules for Validation
 
-Start **Validate APIs with ruleset**. On **Select rules**, choose the five rules from `mybank-oauth-check` — all of them in this example.
+Start **Validate APIs with ruleset**. On **Select rules**, choose the five rules from **mybank-oauth-check** — all of them in this example.
 
 ![Select rules screen for mybank-oauth-check]({{ '/assets/images/posts/api-connect-oauth2-governance/rule-selection-screen.jpg' | relative_url }})
 
 | Rule | What it catches |
 |------|-----------------|
-| **no-implicit-grant-type** | OAuth2 `flow: implicit` |
-| **no-operation-level-security-bypass** | Operation `security: []` that strips API-level auth |
-| **oauth-provider-registered** | Missing or invalid `x-ibm-oauth-provider` |
-| **oauth-required-scopes-defined** | Empty or missing `scopes` |
-| **oauth-security-definition** | Security definition `type` not `oauth2` |
+| **no-implicit-grant-type** | OAuth2 **flow: implicit** |
+| **no-operation-level-security-bypass** | Operation **security: []** that strips API-level auth |
+| **oauth-provider-registered** | Missing or invalid **x-ibm-oauth-provider** |
+| **oauth-required-scopes-defined** | Empty or missing **scopes** |
+| **oauth-security-definition** | Security definition **type** not **oauth2** |
 
 Continue to **Select APIs** and pick the API you want to test — here, **balance-transfer-api:1.0.0**.
 
@@ -144,7 +144,7 @@ Open **View results**. Against a non-compliant definition, the scorecard returns
 
 ![Validation results for balance-transfer-api against mybank-oauth-check]({{ '/assets/images/posts/api-connect-oauth2-governance/scorecard-failing.jpg' | relative_url }})
 
-In this run, `balance-transfer-api:1.0.0` fails three rules in `mybank-oauth-check:1.0.0`:
+In this run, **balance-transfer-api:1.0.0** fails three rules in **mybank-oauth-check:1.0.0**:
 
 1. **oauth-provider-registered** — no approved myBank OAuth2 provider reference
 2. **oauth-required-scopes-defined** — no explicit scopes declared
@@ -156,11 +156,11 @@ Each row tells you the severity, message, rule name, ruleset version, and API �
 
 Update the API definition so it satisfies every rule, then re-run the same validation:
 
-1. Add a security definition with `"type": "oauth2"`.
-2. Set `x-ibm-oauth-provider` to a value matching `inEdgeOAuth2Provider-<major.minor.patch>-<4 hex>`.
-3. Declare at least one scope under `scopes`.
-4. Use a non-implicit flow (for example `accessCode` / authorization code).
-5. Remove any operation-level `security: []` overrides.
+1. Add a security definition with **"type": "oauth2"**.
+2. Set **x-ibm-oauth-provider** to a value matching the approved provider id (for example **inEdgeOAuth2Provider-1.0.0-a1b2**).
+3. Declare at least one scope under **scopes**.
+4. Use a non-implicit flow (for example **accessCode** / authorization code).
+5. Remove any operation-level **security: []** overrides.
 
 Re-validate with the same five rules selected. A clean scorecard means the contract now meets org OAuth2 policy and is ready for the next publish gate.
 
@@ -168,5 +168,5 @@ Re-validate with the same five rules selected. A clean scorecard means the contr
 
 - A ruleset encodes OAuth2 policy once; every scan reuses the same checks.
 - **Select rules → Select APIs → View results** is the fastest loop for testing a new ruleset against a real API.
-- Error messages map 1:1 to rule names, so fixes are specific (`x-ibm-oauth-provider`, scopes, type, flow, operation security).
-- Catching failures on `balance-transfer-api` before publish keeps non-compliant definitions out of the catalog.
+- Error messages map 1:1 to rule names, so fixes are specific (**x-ibm-oauth-provider**, scopes, type, flow, operation security).
+- Catching failures on **balance-transfer-api** before publish keeps non-compliant definitions out of the catalog.
